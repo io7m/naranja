@@ -82,17 +82,11 @@
                   <id>2c768db31ca9955dfec646c56b65fab5</id>
                   <operatingSystem>windows</operatingSystem>
                   <architecture>x64</architecture>
-                  <modules>
-                    <module>java.base</module>
-                  </modules>
                 </runtime>
                 <runtime>
                   <id>ddd7eec509f75c3784b449192e445efd</id>
                   <operatingSystem>linux</operatingSystem>
                   <architecture>x64</architecture>
-                  <modules>
-                    <module>java.base</module>
-                  </modules>
                 </runtime>
               </bundledRuntimes>
             </configuration>
