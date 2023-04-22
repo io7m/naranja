@@ -33,15 +33,15 @@
 
   <properties>
     <com.io7m.anethum.api.version>0.0.2</com.io7m.anethum.api.version>
+    <com.io7m.jade.version>1.0.2</com.io7m.jade.version>
     <com.io7m.jsx.version>3.0.1</com.io7m.jsx.version>
     <com.io7m.jxtrand.version>1.1.0</com.io7m.jxtrand.version>
     <com.io7m.xstructural.version>1.8.0</com.io7m.xstructural.version>
     <io7m.api.previousVersion>0.0.1-SNAPSHOT</io7m.api.previousVersion>
-    <io7m.maven-api.version>3.8.7</io7m.maven-api.version>
+    <io7m.maven-api.version>3.9.1</io7m.maven-api.version>
     <jqwik.version>1.7.3</jqwik.version>
     <junit.version>5.9.2</junit.version>
     <maven-resolver.version>1.9.8</maven-resolver.version>
-    <com.io7m.jade.version>1.0.2</com.io7m.jade.version>
   </properties>
 
   <licenses>
@@ -99,7 +99,7 @@
       <dependency>
         <groupId>com.io7m.verona</groupId>
         <artifactId>com.io7m.verona.core</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>com.io7m.lanark</groupId>
@@ -124,12 +124,12 @@
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.4.6</version>
+        <version>1.4.7</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
-        <version>1.22</version>
+        <version>1.23.0</version>
       </dependency>
       <dependency>
         <groupId>com.io7m.jade</groupId>
@@ -186,7 +186,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>5.3.0</version>
+        <version>5.3.1</version>
       </dependency>
       <dependency>
         <groupId>com.io7m.quixote</groupId>
@@ -203,7 +203,7 @@
       <dependency>
         <groupId>eu.hansolo</groupId>
         <artifactId>jdktools</artifactId>
-        <version>11.0.19</version>
+        <version>17.0.27</version>
       </dependency>
 
       <!-- Maven plugin -->
@@ -215,7 +215,7 @@
       <dependency>
         <groupId>org.apache.maven.plugin-tools</groupId>
         <artifactId>maven-plugin-annotations</artifactId>
-        <version>3.7.0</version>
+        <version>3.8.2</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
