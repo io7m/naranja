@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified"
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:n="urn:com.io7m.naranja:1:0"
+        targetNamespace="urn:com.io7m.naranja:1:0">
+
+  <import namespace="http://purl.org/dc/elements/1.1/"
+          schemaLocation="dc.xsd"/>
+  <import namespace="http://www.w3.org/XML/1998/namespace"
+          schemaLocation="xml.xsd"/>
+
+  <simpleType name="NameType">
+    <restriction base="string">
+      <pattern value="([a-z][a-z0-9_-]{0,63})(\.[a-z][a-z0-9_-]{0,62}){0,15}"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="VersionType">
+    <restriction base="string">
+      <pattern value="([0-9]+)\.([0-9]+)\.([0-9]+)(-(.+))?"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="MetaPropertyType"
+               mixed="true">
+    <annotation>
+      <documentation xml:lang="en">
+        A metadata property.
+      </documentation>
+    </annotation>
+
+    <attribute name="Name"
+               use="required"
+               type="string"/>
+  </complexType>
+
+  <element name="MetaProperty"
+           type="n:MetaPropertyType"/>
+
+  <complexType name="MetadataType">
+    <annotation>
+      <documentation xml:lang="en">
+        An element containing application metadata.
+      </documentation>
+    </annotation>
+
+    <sequence>
+      <group ref="dc:elementsGroup"/>
+      <sequence minOccurs="0"
+                maxOccurs="unbounded">
+        <element ref="n:MetaProperty"/>
+      </sequence>
+    </sequence>
+  </complexType>
+
+  <element name="Metadata"
+           type="n:MetadataType"/>
+
+  <element name="Application">
+    <complexType>
+      <sequence>
+        <element ref="n:Metadata"/>
+        <element ref="n:Files"/>
+        <element ref="n:Runtimes"/>
+      </sequence>
+
+      <attribute name="Name"
+                 use="required"
+                 type="n:NameType"/>
+      <attribute name="Version"
+                 use="required"
+                 type="n:VersionType"/>
+    </complexType>
+  </element>
+
+  <element name="Files">
+    <complexType>
+      <sequence minOccurs="0"
+                maxOccurs="unbounded">
+        <element ref="n:File"/>
+      </sequence>
+    </complexType>
+
+    <unique name="FileNamesUnique">
+      <selector xpath="n:File"/>
+      <field xpath="@Name"/>
+    </unique>
+  </element>
+
+  <element name="File">
+    <complexType>
+      <sequence minOccurs="0"
+                maxOccurs="1">
+        <element ref="n:Metadata"/>
+      </sequence>
+      <attribute name="Name"
+                 use="required"
+                 type="string"/>
+    </complexType>
+  </element>
+
+  <element name="Runtimes">
+    <complexType>
+      <sequence minOccurs="0"
+                maxOccurs="unbounded">
+        <element ref="n:Runtime"/>
+      </sequence>
+    </complexType>
+
+    <unique name="RuntimeNamesUnique">
+      <selector xpath="n:Runtime"/>
+      <field xpath="@ID"/>
+    </unique>
+  </element>
+
+  <element name="Runtime">
+    <complexType>
+      <sequence minOccurs="0"
+                maxOccurs="1">
+        <element ref="n:Metadata"/>
+      </sequence>
+      <attribute name="ID"
+                 use="required"
+                 type="string"/>
+    </complexType>
+  </element>
+
+</schema>

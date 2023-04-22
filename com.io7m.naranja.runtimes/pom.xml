@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>com.io7m.naranja</artifactId>
+    <groupId>com.io7m.naranja</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>com.io7m.naranja.runtimes</artifactId>
+
+  <packaging>jar</packaging>
+  <name>com.io7m.naranja.runtimes</name>
+  <description>Basic application packaging format (JDK runtime retrieval)</description>
+  <url>https://www.github.com/io7m/naranja</url>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.naranja.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.foojay.api</groupId>
+      <artifactId>discoclient</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>eu.hansolo</groupId>
+      <artifactId>jdktools</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jmulticlose</groupId>
+      <artifactId>com.io7m.jmulticlose.core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.annotation.bundle</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.annotation.versioning</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Write a custom manifest that excludes bnd. -->
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd>
+            <![CDATA[
+Automatic-Module-Name:    $[project.artifactId]
+Built-By:                 $[io7m.jar.built_by]
+Bundle-Description:       $[project.description]
+Bundle-DocURL:            $[project.distributionManagement.site.url]
+Bundle-Name:              $[project.artifactId] $[project.version] - $[project.description]
+Bundle-SCM:               $[project.scm.url]
+Bundle-Vendor:            $[io7m.jar.vendor]
+Implementation-Build:     $[buildNumber]
+Implementation-Title:     $[project.name]
+Implementation-Vendor:    $[io7m.jar.vendor]
+Implementation-Vendor-Id: $[project.groupId]
+Implementation-Version:   $[project.version]
+Sealed:                   true
+Specification-Title:      $[project.name]
+Specification-Vendor:     $[io7m.jar.vendor]
+Specification-Version:    $[project.version]
+
+-noextraheaders: true
+-snapshot:       SNAPSHOT
+-removeheaders:  Bnd-LastModified, Tool, Private-Package, Build-Jdk-Spec
+
+Import-Package: \
+  !io.foojay.api.discoclient.*, \
+  !io.foojay.api.discoclient, \
+  !eu.hansolo.jdktools, \
+  !eu.hansolo.jdktools.*, \
+  *
+]]></bnd>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-osgi-manifest</id>
+            <goals>
+              <goal>bnd-process</goal>
+            </goals>
+            <phase>process-classes</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Produce a shaded jar file that hides bnd from the rest of the world. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>shade</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>com.google.gson</pattern>
+                  <shadedPattern>com.io7m.naranja.runtimes.internal.com.google.gson</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>eu.hansolo.jdktools</pattern>
+                  <shadedPattern>com.io7m.naranja.runtimes.internal.eu.hansolo.jdktools</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>io.foojay.api.discoclient</pattern>
+                  <shadedPattern>com.io7m.naranja.runtimes.internal.io.foojay.api.discoclient</shadedPattern>
+                </relocation>
+              </relocations>
+              <artifactSet>
+                <excludes>
+                  <exclude>org.slf4j:*</exclude>
+                  <exclude>com.io7m.naranja:com.io7m.naranja.core:*</exclude>
+                  <exclude>com.io7m.naranja:com.io7m.naranja.runtimes.api:*</exclude>
+                  <exclude>com.io7m.verona:*</exclude>
+                  <exclude>com.io7m.lanark:*</exclude>
+                  <exclude>com.io7m.jmulticlose:*</exclude>
+                  <exclude>org.osgi:*</exclude>
+                  <exclude>org.apache.commons:*</exclude>
+                </excludes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>LICENSE</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/maven/biz.aQute.bnd/**</exclude>
+                    <exclude>META-INF/maven/org.apache.felix/**</exclude>
+                    <exclude>META-INF/maven/org.osgi/**</exclude>
+                    <exclude>META-INF/maven/com.google.code.gson/**</exclude>
+                    <exclude>META-INF/maven/io.foojay.api/**</exclude>
+                    <exclude>META-INF/versions/**</exclude>
+                    <exclude>NOTICE</exclude>
+                    <exclude>OSGI-OPT/**</exclude>
+                    <exclude>about.html</exclude>
+                    <exclude>img/**</exclude>
+                    <exclude>org/osgi/resource/**</exclude>
+                    <exclude>readme.md</exclude>
+                    <exclude>io/foojay/api/discoclient/PropertyManager.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Inject a custom module descriptor that does not include various inputs. -->
+      <plugin>
+        <groupId>org.moditect</groupId>
+        <artifactId>moditect-maven-plugin</artifactId>
+        <version>1.0.0.RC2</version>
+        <executions>
+          <execution>
+            <id>add-module-infos</id>
+            <phase>package</phase>
+            <goals>
+              <goal>add-module-info</goal>
+            </goals>
+            <configuration>
+              <overwriteExistingFiles>true</overwriteExistingFiles>
+              <module>
+                <moduleInfoFile>src/main/java-descriptor/module-info.java</moduleInfoFile>
+              </module>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Make the jar reproducible. -->
+      <plugin>
+        <groupId>io.github.zlika</groupId>
+        <artifactId>reproducible-build-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

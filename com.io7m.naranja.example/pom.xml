@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>com.io7m.naranja</artifactId>
+    <groupId>com.io7m.naranja</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>com.io7m.naranja.example</artifactId>
+
+  <packaging>jar</packaging>
+  <name>com.io7m.naranja.example</name>
+  <description>Basic application packaging format (Example)</description>
+  <url>https://www.github.com/io7m/naranja</url>
+
+  <properties>
+    <mdep.analyze.skip>true</mdep.analyze.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.naranja.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.naranja.maven_plugin</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>com.io7m.naranja.maven_plugin</artifactId>
+        <version>${project.version}</version>
+        <executions>
+          <execution>
+            <id>make</id>
+            <phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <metadata>
+                <Title>Naranja Example Application</Title>
+                <Site>${project.distributionManagement.site.url}</Site>
+              </metadata>
+              <extraFiles>
+                <extraFile>
+                  <fileSource>${project.basedir}/src/main/sh/naranja</fileSource>
+                  <fileOutput>bin/naranja</fileOutput>
+                  <executable>true</executable>
+                </extraFile>
+                <extraFile>
+                  <fileSource>${project.basedir}/src/main/sh/naranja-debug</fileSource>
+                  <fileOutput>bin/naranja-debug</fileOutput>
+                  <executable>true</executable>
+                </extraFile>
+              </extraFiles>
+              <ignoredArtifacts>
+                <ignore>
+                  <groupPattern>org.apache.maven.resolver</groupPattern>
+                </ignore>
+                <ignore>
+                  <groupPattern>com.io7m.naranja</groupPattern>
+                  <artifactPattern>com.io7m.naranja.maven_plugin</artifactPattern>
+                </ignore>
+              </ignoredArtifacts>
+              <categorizedArtifacts>
+                <categorize/>
+              </categorizedArtifacts>
+              <bundledRuntimes>
+                <runtime>
+                  <id>2c768db31ca9955dfec646c56b65fab5</id>
+                  <operatingSystem>windows</operatingSystem>
+                  <architecture>x64</architecture>
+                  <modules>
+                    <module>java.base</module>
+                  </modules>
+                </runtime>
+                <runtime>
+                  <id>ddd7eec509f75c3784b449192e445efd</id>
+                  <operatingSystem>linux</operatingSystem>
+                  <architecture>x64</architecture>
+                  <modules>
+                    <module>java.base</module>
+                  </modules>
+                </runtime>
+              </bundledRuntimes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

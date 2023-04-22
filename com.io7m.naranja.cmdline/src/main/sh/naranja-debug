@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ -z "${NARANJA_HOME}" ]
+then
+  echo "NARANJA_HOME is unset" 1>&2
+  exit 1
+fi
+
+exec /usr/bin/env java \
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=12000 \
+-p "${NARANJA_HOME}/lib" \
+-m com.io7m.naranja.cmdline/com.io7m.naranja.cmdline.NMain \
+"$@"

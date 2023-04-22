@@ -1,0 +1,14 @@
+{
+  "result": [
+    {
+      "filename":"blob.zip",
+      "direct_download_uri":"http://127.0.0.1:10000/blob.zip",
+      "download_site_uri":"",
+      "signature_uri":"",
+      "checksum_uri":"",
+      "checksum":"72ced63fbd59bd5e7b3ee5cf5229d90042dc359a2d0d86535c1fba143df59e47",
+      "checksum_type":"sha256"
+    }
+  ],
+  "message": ""
+}

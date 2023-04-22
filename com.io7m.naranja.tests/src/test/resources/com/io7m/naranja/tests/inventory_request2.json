@@ -1,0 +1,32 @@
+{
+  "result": [
+    {
+      "id": "3880ef683b04f9e23cb95311e2588dad",
+      "archive_type": "zip",
+      "distribution": "temurin",
+      "major_version": 17,
+      "java_version": "17.0.7+7",
+      "distribution_version": "17.0.7",
+      "jdk_version": 17,
+      "latest_build_available": true,
+      "release_status": "ga",
+      "term_of_support": "lts",
+      "operating_system": "linux",
+      "lib_c_type": "glibc",
+      "architecture": "x86_64",
+      "fpu": "unknown",
+      "package_type": "jdk",
+      "javafx_bundled": false,
+      "directly_downloadable": true,
+      "filename": "openjdk-17-jdk_17.0.7+7-1.zip",
+      "free_use_in_production": true,
+      "tck_tested": "unknown",
+      "tck_cert_uri": "",
+      "aqavit_certified": "unknown",
+      "aqavit_cert_uri": "",
+      "size": 65536,
+      "feature": []
+    }
+  ],
+  "message": ""
+}
