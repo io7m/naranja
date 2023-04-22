@@ -117,6 +117,7 @@ public final class NApplicationWriters
           Objects.requireNonNullElse(
             e.getMessage(),
             e.getClass().getSimpleName()),
+          e,
           errorIo()
         );
       }
@@ -145,19 +146,30 @@ public final class NApplicationWriters
 
         switch (file.executable()) {
           case EXECUTABLE -> {
-            LOG.info("executable {}", targetFile);
-
-            final var existing =
-              new HashSet<>(Files.getPosixFilePermissions(targetFile));
-            existing.add(PosixFilePermission.OWNER_EXECUTE);
-            existing.add(PosixFilePermission.GROUP_EXECUTE);
-            existing.add(PosixFilePermission.OTHERS_EXECUTE);
-            Files.setPosixFilePermissions(targetFile, existing);
+            setFileExecutable(targetFile);
           }
           case NOT_EXECUTABLE -> {
 
           }
         }
+      }
+    }
+
+    private static void setFileExecutable(
+      final Path targetFile)
+      throws IOException
+    {
+      LOG.info("executable {}", targetFile);
+
+      try {
+        final var existing =
+          new HashSet<>(Files.getPosixFilePermissions(targetFile));
+        existing.add(PosixFilePermission.OWNER_EXECUTE);
+        existing.add(PosixFilePermission.GROUP_EXECUTE);
+        existing.add(PosixFilePermission.OTHERS_EXECUTE);
+        Files.setPosixFilePermissions(targetFile, existing);
+      } catch (final UnsupportedOperationException e) {
+        // We are on a non-POSIX filesystem
       }
     }
 
