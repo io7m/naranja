@@ -40,6 +40,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.tika.Tika;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
@@ -78,6 +79,8 @@ import static org.apache.maven.plugins.annotations.LifecyclePhase.PACKAGE;
 
 public final class NBuildMojo extends AbstractMojo
 {
+  private final Tika tika;
+
   /**
    * Access to the Maven project.
    */
@@ -186,7 +189,7 @@ public final class NBuildMojo extends AbstractMojo
 
   public NBuildMojo()
   {
-
+    this.tika = new Tika();
   }
 
   private enum ProcessResult
@@ -471,6 +474,13 @@ public final class NBuildMojo extends AbstractMojo
           artifactInfo
         );
 
+        appBuilder.artifactMetadataAdd(
+          artifactInfo,
+          "ContentType",
+          Objects.requireNonNullElse(
+            this.tika.detect(file),
+            "application/octet-stream")
+        );
         appBuilder.artifactMetadataAdd(
           artifactInfo,
           "HashAlgorithm",

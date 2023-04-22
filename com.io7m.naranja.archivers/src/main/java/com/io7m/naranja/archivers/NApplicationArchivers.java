@@ -25,17 +25,16 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipParameters;
+import org.apache.tika.Tika;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.nio.file.attribute.PosixFilePermission;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.zip.Deflater;
 
@@ -80,6 +79,7 @@ public final class NApplicationArchivers
     private final String prefix;
     private final Path sourceDirectory;
     private final Path outputFile;
+    private final Tika tika;
     private long fileIndex;
     private String fileName;
     private long fileCount;
@@ -99,6 +99,7 @@ public final class NApplicationArchivers
       this.fileIndex = 0L;
       this.fileCount = 0L;
       this.fileName = "";
+      this.tika = new Tika();
     }
 
     @Override
@@ -163,7 +164,7 @@ public final class NApplicationArchivers
         entry.setLastAccessTime(BASE_TIME);
         entry.setGroupId(0L);
         entry.setUserId(0L);
-        entry.setMode(modeOfFile(fileActual));
+        entry.setMode(this.modeOfFile(fileActual));
         entry.setSize(Files.size(fileActual));
 
         output.putArchiveEntry(entry);
@@ -175,79 +176,18 @@ public final class NApplicationArchivers
       }
     }
 
-    private static final int GROUP_EXEC = 0x08;
-    private static final int GROUP_READ = 0x20;
-    private static final int GROUP_WRITE = 0x10;
-    private static final int OTHER_EXEC = 0x01;
-    private static final int OTHER_READ = 0x04;
-    private static final int OTHER_WRITE = 0x02;
-    private static final int OWNER_EXEC = 0x40;
-    private static final int OWNER_READ = 0x100;
-    private static final int OWNER_WRITE = 0x80;
-
-    private static int modeOfFile(
+    private int modeOfFile(
       final Path fileActual)
       throws IOException
     {
-      final var permissions =
-        Files.getPosixFilePermissions(fileActual);
-
-      var mode = 0;
-      mode = modeOfFileOwner(permissions, mode);
-      mode = modeOfFileGroup(permissions, mode);
-      mode = modeOfFileOther(permissions, mode);
-      return mode;
-    }
-
-    private static int modeOfFileOther(
-      final Set<PosixFilePermission> permissions,
-      final int mode)
-    {
-      int r = mode;
-      if (permissions.contains(PosixFilePermission.OTHERS_EXECUTE)) {
-        r |= OTHER_EXEC;
-      }
-      if (permissions.contains(PosixFilePermission.OTHERS_WRITE)) {
-        r |= OTHER_WRITE;
-      }
-      if (permissions.contains(PosixFilePermission.OTHERS_READ)) {
-        r |= OTHER_READ;
-      }
-      return r;
-    }
-
-    private static int modeOfFileGroup(
-      final Set<PosixFilePermission> permissions,
-      final int mode)
-    {
-      int r = mode;
-      if (permissions.contains(PosixFilePermission.GROUP_EXECUTE)) {
-        r |= GROUP_EXEC;
-      }
-      if (permissions.contains(PosixFilePermission.GROUP_WRITE)) {
-        r |= GROUP_WRITE;
-      }
-      if (permissions.contains(PosixFilePermission.GROUP_READ)) {
-        r |= GROUP_READ;
-      }
-      return r;
-    }
-
-    private static int modeOfFileOwner(
-      final Set<PosixFilePermission> permissions,
-      final int mode)
-    {
-      int r = mode;
-      if (permissions.contains(PosixFilePermission.OWNER_EXECUTE)) {
-        r |= OWNER_EXEC;
-      }
-      if (permissions.contains(PosixFilePermission.OWNER_WRITE)) {
-        r |= OWNER_WRITE;
-      }
-      if (permissions.contains(PosixFilePermission.OWNER_READ)) {
-        r |= OWNER_READ;
-      }
-      return r;
+      final var type = this.tika.detect(fileActual);
+      return switch (type) {
+        case "application/x-sharedlib",
+          "application/x-executable" -> {
+          yield 0755;
+        }
+        default -> 0644;
+      };
     }
 
     @Override

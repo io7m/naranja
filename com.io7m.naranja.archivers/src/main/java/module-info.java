@@ -24,7 +24,9 @@ module com.io7m.naranja.archivers
   requires static org.osgi.annotation.versioning;
 
   requires transitive com.io7m.naranja.core;
+
   requires org.apache.commons.compress;
+  requires org.apache.tika.core;
 
   exports com.io7m.naranja.archivers;
 }
