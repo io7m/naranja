@@ -63,6 +63,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.spi.ToolProvider;
 import java.util.stream.Collectors;
@@ -127,8 +128,7 @@ public final class NRuntimeInventories
   private record RuntimePaths(
     Path rtFile,
     Path rtFileTmp,
-    Path rtiFile
-  )
+    Path rtiFile)
   {
     static RuntimePaths create(
       final Path baseDirectory,
@@ -154,6 +154,7 @@ public final class NRuntimeInventories
     private final Path baseDirectory;
     private final DiscoClient client;
     private final Path runtimes;
+    private final ReentrantLock mainLock;
 
     Inventory(
       final Path inBaseDirectory,
@@ -165,6 +166,8 @@ public final class NRuntimeInventories
         Objects.requireNonNull(inClient, "client");
       this.runtimes =
         this.baseDirectory.resolve("runtimes");
+      this.mainLock =
+        new ReentrantLock();
     }
 
     @Override
@@ -305,7 +308,7 @@ public final class NRuntimeInventories
         RuntimePaths.create(this.runtimes, runtime);
 
       final var future = new CompletableFuture<Path>();
-      final var download = new Download(runtime, future, paths);
+      final var download = new Download(this.mainLock, runtime, future, paths);
       final var thread = new Thread(download);
       thread.setName("com.io7m.naranja.runtimes.download." + thread.getId());
       thread.start();
@@ -327,16 +330,21 @@ public final class NRuntimeInventories
       try {
         Files.createDirectories(paths.rtFileTmp.getParent());
 
-        try (var file =
-               FileChannel.open(paths.rtFileTmp, CREATE, WRITE)) {
-          try (var lock = file.lock()) {
-            switch (runtime.archiveType()) {
-              case RUNTIME_ARCHIVE_TAR_GZ ->
-                runtimeUnpackTarGZ(paths.rtFile, output);
-              case RUNTIME_ARCHIVE_ZIP ->
-                runtimeUnpackZip(paths.rtFile, output);
+        this.mainLock.lock();
+        try {
+          try (var file =
+                 FileChannel.open(paths.rtFileTmp, CREATE, WRITE)) {
+            try (var lock = file.lock()) {
+              switch (runtime.archiveType()) {
+                case RUNTIME_ARCHIVE_TAR_GZ ->
+                  runtimeUnpackTarGZ(paths.rtFile, output);
+                case RUNTIME_ARCHIVE_ZIP ->
+                  runtimeUnpackZip(paths.rtFile, output);
+              }
             }
           }
+        } finally {
+          this.mainLock.unlock();
         }
       } catch (final IOException e) {
         throw new NException(
@@ -670,13 +678,18 @@ public final class NRuntimeInventories
       try {
         Files.createDirectories(paths.rtFileTmp.getParent());
 
-        try (var file =
-               FileChannel.open(paths.rtFileTmp, CREATE, WRITE)) {
-          try (var lock = file.lock()) {
-            Files.deleteIfExists(paths.rtFileTmp);
-            Files.deleteIfExists(paths.rtiFile);
-            Files.deleteIfExists(paths.rtFile);
+        this.mainLock.lock();
+        try {
+          try (var file =
+                 FileChannel.open(paths.rtFileTmp, CREATE, WRITE)) {
+            try (var lock = file.lock()) {
+              Files.deleteIfExists(paths.rtFileTmp);
+              Files.deleteIfExists(paths.rtiFile);
+              Files.deleteIfExists(paths.rtFile);
+            }
           }
+        } finally {
+          this.mainLock.unlock();
         }
       } catch (final IOException e) {
         throw new NException(
@@ -768,12 +781,16 @@ public final class NRuntimeInventories
     private final CompletableFuture<Path> future;
     private final RuntimePaths paths;
     private long sizeReceived;
+    private final ReentrantLock mainLock;
 
     Download(
+      final ReentrantLock inMainLock,
       final NRuntime inRuntime,
       final CompletableFuture<Path> inFuture,
       final RuntimePaths inPaths)
     {
+      this.mainLock =
+        Objects.requireNonNull(inMainLock, "mainLock");
       this.runtime =
         Objects.requireNonNull(inRuntime, "runtime");
       this.future =
@@ -806,11 +823,16 @@ public final class NRuntimeInventories
       try {
         Files.createDirectories(this.paths.rtFileTmp.getParent());
 
-        try (var file =
-               FileChannel.open(this.paths.rtFileTmp, CREATE, WRITE)) {
-          try (var lock = file.lock()) {
-            this.executeDownload(file);
+        this.mainLock.lock();
+        try {
+          try (var file =
+                 FileChannel.open(this.paths.rtFileTmp, CREATE, WRITE)) {
+            try (var lock = file.lock()) {
+              this.executeDownload(file);
+            }
           }
+        } finally {
+          this.mainLock.unlock();
         }
 
         this.future.complete(this.paths.rtFile);
