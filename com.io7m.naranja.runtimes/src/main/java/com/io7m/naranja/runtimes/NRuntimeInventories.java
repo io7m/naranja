@@ -604,7 +604,12 @@ public final class NRuntimeInventories
       addPermissionsOwner(mode, perms);
       addPermissionsGroup(mode, perms);
       addPermissionsOther(mode, perms);
-      Files.setPosixFilePermissions(outputFile, perms);
+
+      try {
+        Files.setPosixFilePermissions(outputFile, perms);
+      } catch (final UnsupportedOperationException e) {
+        // We are on a non-POSIX filesystem
+      }
     }
 
     private static void addPermissionsOther(
